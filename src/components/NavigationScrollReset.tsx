@@ -6,69 +6,74 @@ import { usePathname } from "next/navigation";
 export function NavigationScrollReset() {
   const pathname = usePathname();
   const prevPathname = useRef<string | null>(null);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  };
+  // Track whether we need to lock scroll to top after a back-navigation
+  const lockScrollRef = useRef(false);
 
   useEffect(() => {
-    // Let us control scroll restoration entirely
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
-
-    // Before the user navigates away from "/", overwrite the current history
-    // entry's scroll position to 0 so the browser restores to the top on back.
-    const handleBeforeUnload = () => {
-      if (window.location.pathname === "/") {
-        history.replaceState({ ...history.state, __scrollY: 0 }, "");
-      }
-    };
-
-    // pagehide fires reliably right before the page is hidden (navigation away)
-    window.addEventListener("pagehide", handleBeforeUnload);
-
-    // Also handle link clicks that trigger client-side navigation (Next.js router)
-    const handleClick = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement).closest<HTMLAnchorElement>("a");
-      if (!target) return;
-      const href = target.getAttribute("href");
-      if (href && href !== "/" && !href.startsWith("#") && href.startsWith("/")) {
-        // Navigating away from the main page — pin scroll position to 0
-        if (window.location.pathname === "/") {
-          history.replaceState({ ...history.state, __scrollY: 0 }, "");
-        }
-      }
-    };
-    document.addEventListener("click", handleClick, true);
-
-    // Listen for popstate events (back/forward button)
-    const handlePopState = () => {
-      if (window.location.pathname === "/") {
-        scrollToTop();
-        setTimeout(scrollToTop, 50);
-        setTimeout(scrollToTop, 150);
-        setTimeout(scrollToTop, 300);
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("pagehide", handleBeforeUnload);
-      document.removeEventListener("click", handleClick, true);
-      window.removeEventListener("popstate", handlePopState);
-    };
   }, []);
 
   useEffect(() => {
-    // Scroll to top when Next.js router lands on "/" coming from another page
-    if (pathname === "/" && prevPathname.current !== null && prevPathname.current !== "/") {
-      scrollToTop();
-      setTimeout(scrollToTop, 50);
-      setTimeout(scrollToTop, 150);
-      setTimeout(scrollToTop, 300);
-    }
+    const isReturningToHome =
+      pathname === "/" &&
+      prevPathname.current !== null &&
+      prevPathname.current !== "/";
+
     prevPathname.current = pathname;
+
+    if (!isReturningToHome) return;
+
+    // Immediately scroll to top
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    // Engage the scroll lock so any framework/browser scroll restoration
+    // attempt that fires in the next ~400ms gets overridden
+    lockScrollRef.current = true;
+
+    const forceTop = () => {
+      if (lockScrollRef.current) {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    };
+
+    // Override scrollTo temporarily so nothing can scroll away from top
+    const originalScrollTo = window.scrollTo.bind(window);
+    const guardedScrollTo = (...args: Parameters<typeof window.scrollTo>) => {
+      // If we're locking, ignore any scroll-to call that isn't top:0
+      if (lockScrollRef.current) {
+        const options = args[0];
+        if (typeof options === "object" && options !== null) {
+          if ((options as ScrollToOptions).top !== 0) return;
+        } else if (typeof args[0] === "number" && args[0] !== 0) {
+          return;
+        }
+      }
+      originalScrollTo(...args);
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).scrollTo = guardedScrollTo;
+
+    // Poll to keep top while locked
+    const intervals = [10, 30, 60, 100, 150, 200, 300, 400].map((ms) =>
+      setTimeout(forceTop, ms)
+    );
+
+    // Release the lock after 450ms
+    const releaseLock = setTimeout(() => {
+      lockScrollRef.current = false;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).scrollTo = originalScrollTo;
+    }, 450);
+
+    return () => {
+      lockScrollRef.current = false;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).scrollTo = originalScrollTo;
+      intervals.forEach(clearTimeout);
+      clearTimeout(releaseLock);
+    };
   }, [pathname]);
 
   return null;
