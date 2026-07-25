@@ -6,7 +6,7 @@ const icons = [Smartphone, WalletCards];
 
 export function ProductComparison() {
   return (
-    <section className="bg-[var(--surface)] py-16 sm:py-24">
+    <section className="bg-[var(--surface)] py-8 sm:py-12">
       <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
         <div className="mx-auto max-w-[740px] text-center">
           <h2 className="font-[family:var(--font-display)] text-4xl leading-tight tracking-[-0.04em] text-[var(--ink)] sm:text-6xl">

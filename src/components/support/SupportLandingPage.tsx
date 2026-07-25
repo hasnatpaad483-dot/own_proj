@@ -64,7 +64,7 @@ export function SupportLandingPage({
         </div>
       </section>
 
-      <section className="bg-[var(--surface)] py-16 sm:py-24">
+      <section className="bg-[var(--surface)] py-8 sm:py-12">
         <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
           {showContactForm ? (
             <div className="mx-auto max-w-[760px] rounded-[30px] border border-[var(--border-soft)] bg-white px-5 py-6 text-left shadow-[0_18px_45px_rgba(8,15,39,0.05)] sm:px-8 sm:py-8">
