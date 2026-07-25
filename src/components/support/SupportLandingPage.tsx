@@ -8,15 +8,11 @@ import { Footer } from "@/components/term-deposits/Footer";
 
 type SupportLandingPageProps = {
   title: string;
-  intro: string;
-  supportingText: string;
   showContactForm?: boolean;
 };
 
 export function SupportLandingPage({
   title,
-  intro,
-  supportingText,
   showContactForm = false,
 }: SupportLandingPageProps) {
   const [supportType, setSupportType] = useState("individual");
@@ -45,10 +41,23 @@ export function SupportLandingPage({
                 {title}
               </h1>
               <p className="mt-5 max-w-[340px] text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
-                {intro}
+                Call on{" "}
+                <a
+                  href="tel:+61489989446"
+                  className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition"
+                >
+                  +61 489 989 446
+                </a>
               </p>
               <p className="mt-4 max-w-[340px] text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
-                {supportingText}
+                Visit our{" "}
+                <a
+                  href="/help-centre"
+                  className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition"
+                >
+                  Help Centre
+                </a>{" "}
+                for more answers to your questions.
               </p>
             </div>
           </div>
@@ -56,16 +65,9 @@ export function SupportLandingPage({
       </section>
 
       <section className="bg-[var(--surface)] py-16 sm:py-24">
-        <div className="mx-auto max-w-[1120px] px-4 text-center sm:px-6">
-          <h2 className="font-[family:var(--font-display)] text-4xl leading-tight tracking-[-0.04em] text-[var(--ink)] sm:text-6xl">
-            How can we assist you?
-          </h2>
-          <p className="mx-auto mt-5 max-w-[520px] text-base leading-8 text-[var(--copy)] sm:text-lg">
-            Select from the options below to find the right support.
-          </p>
-
+        <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
           {showContactForm ? (
-            <div className="mx-auto mt-10 max-w-[760px] rounded-[30px] border border-[var(--border-soft)] bg-white px-5 py-6 text-left shadow-[0_18px_45px_rgba(8,15,39,0.05)] sm:px-8 sm:py-8">
+            <div className="mx-auto max-w-[760px] rounded-[30px] border border-[var(--border-soft)] bg-white px-5 py-6 text-left shadow-[0_18px_45px_rgba(8,15,39,0.05)] sm:px-8 sm:py-8">
               <label htmlFor="support-type" className="block text-sm font-medium text-[var(--copy)]">
                 I need help with...
               </label>
@@ -159,6 +161,7 @@ export function SupportLandingPage({
           )}
         </div>
       </section>
+
       <section className="border-t border-[var(--border-soft)] bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
           <h2 className="font-[family:var(--font-display)] text-3xl leading-tight tracking-[-0.03em] text-[var(--ink)] sm:text-4xl">
@@ -193,6 +196,7 @@ export function SupportLandingPage({
           </div>
         </div>
       </section>
+
       <Footer />
     </div>
   );
