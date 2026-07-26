@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, Info } from "lucide-react";
 
 import { Header } from "@/components/term-deposits/Header";
 import { Footer } from "@/components/term-deposits/Footer";
+import { supabase } from "@/lib/supabase";
 
 type SupportLandingPageProps = {
   title: string;
@@ -16,9 +17,46 @@ export function SupportLandingPage({
   showContactForm = false,
 }: SupportLandingPageProps) {
   const [supportType, setSupportType] = useState("individual");
-  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [contactDatetime, setContactDatetime] = useState("");
 
-  const handleSubmit = () => {
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    // At least email or phone must be filled
+    if (!email.trim() && !phone.trim()) {
+      setError("Please provide at least an email or phone number.");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    const { error: dbError } = await supabase.from("contact_submissions").insert({
+      support_type: supportType || null,
+      name: name.trim() || null,
+      phone: phone.trim() || null,
+      email: email.trim() || null,
+      contact_datetime: contactDatetime || null,
+    });
+
+    setLoading(false);
+
+    if (dbError) {
+      setError("Something went wrong. Please try again.");
+      return;
+    }
+
+    // Reset form
+    setSupportType("individual");
+    setName("");
+    setPhone("");
+    setEmail("");
+    setContactDatetime("");
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 6000);
   };
@@ -28,14 +66,16 @@ export function SupportLandingPage({
       <Header />
 
       <section className="relative overflow-hidden bg-[#d7d1cb]">
-        <div
-          className="w-full min-h-[300px] bg-cover bg-center bg-no-repeat sm:min-h-[360px] lg:min-h-[410px]"
-          style={{
-            backgroundImage: "linear-gradient(90deg, rgba(18,16,16,0.16), rgba(18,16,16,0.03)), url('/contact_us.jpeg')",
-            backgroundPosition: "center center",
-          }}
-        >
-          <div className="mx-auto flex h-full max-w-[1120px] items-start px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <div className="relative">
+          {/* Background image fills the full height of the content */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: "linear-gradient(90deg, rgba(18,16,16,0.16), rgba(18,16,16,0.03)), url('/contact_us.jpeg')",
+            }}
+          />
+          {/* Content drives the section height */}
+          <div className="relative mx-auto max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
             <div className="mt-3 w-full max-w-[455px] bg-black px-7 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.26)] sm:px-8 sm:py-8">
               <h1 className="font-[family:var(--font-display)] text-[3.15rem] leading-[0.95] tracking-[-0.045em] text-white sm:text-[3.7rem]">
                 {title}
@@ -92,17 +132,21 @@ export function SupportLandingPage({
                       <input
                         id="contact-name"
                         type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         className="mt-2 w-full rounded-[6px] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[var(--brand)] sm:text-base"
                       />
                     </div>
 
                     <div>
                       <label htmlFor="contact-phone" className="block text-sm font-medium text-[var(--copy)]">
-                        Contact Phone
+                        Phone
                       </label>
                       <input
                         id="contact-phone"
                         type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         className="mt-2 w-full rounded-[6px] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[var(--brand)] sm:text-base"
                       />
                     </div>
@@ -114,17 +158,21 @@ export function SupportLandingPage({
                       <input
                         id="contact-email"
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="mt-2 w-full rounded-[6px] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[var(--brand)] sm:text-base"
                       />
                     </div>
 
                     <div>
                       <label htmlFor="contact-time" className="block text-sm font-medium text-[var(--copy)]">
-                        Best date and time to contact you
+                        Select date and time
                       </label>
                       <input
                         id="contact-time"
                         type="datetime-local"
+                        value={contactDatetime}
+                        onChange={(e) => setContactDatetime(e.target.value)}
                         className="mt-2 w-full rounded-[6px] border border-[var(--border-strong)] bg-white px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[var(--brand)] sm:text-base"
                       />
                     </div>
@@ -133,11 +181,19 @@ export function SupportLandingPage({
                   <div className="mt-8 flex flex-col items-center gap-5">
                     <button
                       type="button"
-                      onClick={() => handleSubmit()}
-                      className="inline-flex w-full max-w-[320px] items-center justify-center rounded-2xl bg-[var(--brand)] px-6 py-4 text-sm font-semibold text-white shadow-[0_16px_35px_rgba(0,102,204,0.24)] transition hover:bg-[var(--brand-dark)] sm:text-base"
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="inline-flex w-full max-w-[320px] items-center justify-center rounded-2xl bg-[var(--brand)] px-6 py-4 text-sm font-semibold text-white shadow-[0_16px_35px_rgba(0,102,204,0.24)] transition hover:bg-[var(--brand-dark)] disabled:opacity-60 disabled:cursor-not-allowed sm:text-base"
                     >
-                      Submit
+                      {loading ? "Submitting..." : "Submit"}
                     </button>
+
+                    {error ? (
+                      <div className="flex w-full items-start gap-3 rounded-2xl border border-[#f5c2c7] bg-[#fff5f5] px-5 py-4">
+                        <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#c0392b]" />
+                        <p className="text-sm text-[#c0392b] sm:text-base">{error}</p>
+                      </div>
+                    ) : null}
 
                     {submitted ? (
                       <div className="flex w-full items-start gap-3 rounded-2xl border border-[#c3dfa8] bg-[#f3faec] px-5 py-4">
@@ -168,7 +224,6 @@ export function SupportLandingPage({
             Accessibility options
           </h2>
           <div className="mt-8 grid gap-8 md:grid-cols-2">
-            {/* Translating and Interpreting Services */}
             <div>
               <h3 className="text-lg font-semibold text-[var(--ink)]">
                 Translating and Interpreting Services
@@ -183,7 +238,6 @@ export function SupportLandingPage({
               </p>
             </div>
 
-            {/* National Relay Service */}
             <div>
               <h3 className="text-lg font-semibold text-[var(--ink)]">
                 National Relay Service (NRS)
