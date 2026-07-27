@@ -61,15 +61,24 @@ export function Header() {
       </div>
 
       <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:min-h-[96px] lg:px-8">
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 text-white transition hover:bg-white/10 lg:hidden"
-          aria-label="Open menu"
-          onClick={() => setMobileOpen(true)}
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {/* Mobile: logo on the left */}
+        <Link href="/" className="inline-flex items-center gap-2 text-white lg:hidden">
+          <Image
+            src="/mlogo-white.svg"
+            alt="Macquarie logo"
+            width={39}
+            height={39}
+            className="h-[39px] w-[39px] shrink-0"
+          />
+          <span
+            className="translate-y-[1px] text-base leading-none font-normal tracking-[-0.015em] text-white"
+            style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+          >
+            MACQUARIE
+          </span>
+        </Link>
 
+        {/* Desktop: logo on the left */}
         <Link
           href="/"
           className="hidden shrink-0 items-center gap-[11px] pr-[22px] text-white lg:ml-[24px] lg:inline-flex"
@@ -103,21 +112,32 @@ export function Header() {
           ))}
         </nav>
 
-        <Link href="/" className="inline-flex items-center gap-2 text-white lg:hidden">
-          <Image
-            src="/mlogo-white.svg"
-            alt="Macquarie logo"
-            width={39}
-            height={39}
-            className="h-[39px] w-[39px] shrink-0"
-          />
-          <span
-            className="translate-y-[1px] text-base leading-none font-normal tracking-[-0.015em] text-white"
-            style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
-          >
-            MACQUARIE
-          </span>
-        </Link>
+        {/* Mobile: hamburger on the right */}
+        <button
+          type="button"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/12 text-white transition hover:bg-white/10 lg:hidden"
+          aria-label="Open menu"
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Mobile: nav items in a scrollable row below the header bar */}
+      <div className="border-t border-white/10 lg:hidden">
+        <div className="flex items-center gap-1 overflow-x-auto px-4 py-2 sm:px-6 scrollbar-none">
+          {primaryNavItems.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              onClick={(e) => handleSectionClick(item.href, e)}
+              className="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/10 whitespace-nowrap"
+              style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
       </div>
 
       {mobileOpen ? (
