@@ -27,7 +27,6 @@ export function SupportLandingPage({
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    // At least email or phone must be filled
     if (!email.trim() && !phone.trim()) {
       setError("Please provide at least an email or phone number.");
       return;
@@ -51,7 +50,6 @@ export function SupportLandingPage({
       return;
     }
 
-    // Reset form
     setSupportType("individual");
     setName("");
     setPhone("");
@@ -65,45 +63,75 @@ export function SupportLandingPage({
     <div className="min-h-screen bg-[var(--surface)] text-[var(--ink)]">
       <Header />
 
-      <section className="relative overflow-hidden bg-[#d7d1cb]">
-        <div className="relative">
-          {/* Background image fills the full height of the content */}
+      {/* ── Hero ── */}
+      <section className="bg-[#d7d1cb]">
+
+        {/* Photo — full width, stacks above on mobile, sits behind content on desktop */}
+        <div
+          className="w-full h-[220px] bg-cover bg-center sm:h-[280px] lg:hidden"
+          style={{
+            backgroundImage: "url('/contact_us.jpeg')",
+          }}
+        />
+
+        {/* Desktop: photo as absolute background + black box overlay */}
+        <div className="relative hidden lg:block">
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="w-full lg:min-h-[410px] bg-cover bg-center"
             style={{
-              backgroundImage: "linear-gradient(90deg, rgba(18,16,16,0.16), rgba(18,16,16,0.03)), url('/contact_us.jpeg')",
+              backgroundImage:
+                "linear-gradient(90deg, rgba(18,16,16,0.16), rgba(18,16,16,0.03)), url('/contact_us.jpeg')",
             }}
           />
-          {/* Content drives the section height */}
-          <div className="relative mx-auto max-w-[1120px] px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-            <div className="mt-3 w-full max-w-[455px] bg-black px-7 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.26)] sm:px-8 sm:py-8">
-              <h1 className="font-[family:var(--font-display)] text-[3.15rem] leading-[0.95] tracking-[-0.045em] text-white sm:text-[3.7rem]">
-                {title}
-              </h1>
-              <p className="mt-5 max-w-[340px] text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
-                Call on{" "}
-                <a
-                  href="tel:+61489989446"
-                  className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition"
-                >
-                  +61 489 989 446
-                </a>
-              </p>
-              <p className="mt-4 max-w-[340px] text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
-                Visit our{" "}
-                <a
-                  href="/help-centre"
-                  className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition"
-                >
-                  Help Centre
-                </a>{" "}
-                for more answers to your questions.
-              </p>
+          <div className="absolute inset-0 flex items-start">
+            <div className="mx-auto w-full max-w-[1120px] px-8 py-10">
+              <div className="mt-3 w-full max-w-[455px] bg-black px-8 py-8 text-white shadow-[0_24px_70px_rgba(0,0,0,0.26)]">
+                <h1 className="font-[family:var(--font-display)] text-[3.7rem] leading-[0.95] tracking-[-0.045em] text-white">
+                  {title}
+                </h1>
+                <p className="mt-5 max-w-[340px] text-[0.98rem] leading-7 text-white/88">
+                  Call on{" "}
+                  <a href="tel:+61489989446" className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition">
+                    +61 489 989 446
+                  </a>
+                </p>
+                <p className="mt-4 max-w-[340px] text-[0.98rem] leading-7 text-white/88">
+                  Visit our{" "}
+                  <a href="/help-centre" className="font-semibold text-white underline underline-offset-2 hover:text-white/80 transition">
+                    Help Centre
+                  </a>{" "}
+                  for more answers to your questions.
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Mobile / tablet: black bar below the photo */}
+        <div className="bg-black px-5 py-7 text-white lg:hidden sm:px-8 sm:py-8">
+          <div className="mx-auto max-w-[600px]">
+            <h1 className="font-[family:var(--font-display)] text-[2.6rem] leading-[0.95] tracking-[-0.04em] text-white sm:text-[3.2rem]">
+              {title}
+            </h1>
+            <p className="mt-4 text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
+              Call on{" "}
+              <a href="tel:+61489989446" className="font-semibold text-white underline underline-offset-2">
+                +61 489 989 446
+              </a>
+            </p>
+            <p className="mt-3 text-sm leading-6 text-white/88 sm:text-[0.98rem] sm:leading-7">
+              Visit our{" "}
+              <a href="/help-centre" className="font-semibold text-white underline underline-offset-2">
+                Help Centre
+              </a>{" "}
+              for more answers to your questions.
+            </p>
+          </div>
+        </div>
+
       </section>
 
+      {/* ── Form ── */}
       <section className="bg-[var(--surface)] py-8 sm:py-12">
         <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
           {showContactForm ? (
@@ -218,6 +246,7 @@ export function SupportLandingPage({
         </div>
       </section>
 
+      {/* ── Accessibility ── */}
       <section className="border-t border-[var(--border-soft)] bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-[1120px] px-4 sm:px-6">
           <h2 className="font-[family:var(--font-display)] text-3xl leading-tight tracking-[-0.03em] text-[var(--ink)] sm:text-4xl">
@@ -237,7 +266,6 @@ export function SupportLandingPage({
                 arrange an interpreter to help you with your banking needs.
               </p>
             </div>
-
             <div>
               <h3 className="text-lg font-semibold text-[var(--ink)]">
                 National Relay Service (NRS)
